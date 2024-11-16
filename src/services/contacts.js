@@ -1,6 +1,31 @@
 import ContactsCollection from '../db/models/Contact.js';
 
-export const getContacts = () => ContactsCollection.find();
+import { calculatePaginationData } from '../utils/calculatePaginationData.js';
+
+export const getContacts = async ({
+  page = 1,
+  perPage = 10,
+  sortBy = '_id',
+  sortOrder = 'asc',
+  filter = {},
+}) => {
+  const skip = (page - 1) * perPage;
+  const data = await ContactsCollection.find(filter)
+    .skip(skip)
+    .limit(perPage)
+    .sort({ [sortBy]: sortOrder });
+  const totalItems = await ContactsCollection.countDocuments(filter);
+  const paginationData = calculatePaginationData({
+    page,
+    perPage,
+    totalItems,
+  });
+
+  return {
+    data,
+    ...paginationData,
+  };
+};
 
 export const getContactsById = (id) => ContactsCollection.findById(id);
 
@@ -12,7 +37,6 @@ export const updateContact = async ({ _id, payload, options = {} }) => {
     payload,
     {
       ...options,
-      new: true,
       includeResultMetadata: true,
     },
   );

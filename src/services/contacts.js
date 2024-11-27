@@ -10,10 +10,17 @@ export const getContacts = async ({
   filter = {},
 }) => {
   const skip = (page - 1) * perPage;
-  const data = await ContactsCollection.find(filter)
+
+  const query = ContactsCollection.find(filter);
+  if (filter.userId) {
+    query.where('userId').equals(filter.userId);
+  }
+
+  const data = await query
     .skip(skip)
     .limit(perPage)
     .sort({ [sortBy]: sortOrder });
+
   const totalItems = await ContactsCollection.countDocuments(filter);
   const paginationData = calculatePaginationData({
     page,

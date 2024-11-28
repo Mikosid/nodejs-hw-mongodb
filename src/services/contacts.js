@@ -34,27 +34,25 @@ export const getContacts = async ({
   };
 };
 
-export const getContactsById = (id) => ContactsCollection.findById(id);
+export const getContactByIdAndUserId = (id, userId) =>
+  ContactsCollection.findOne({ _id: id, userId });
 
 export const addContact = (data) => ContactsCollection.create(data);
 
-export const updateContact = async ({ _id, payload, options = {} }) => {
+export const updateContact = async ({ _id, userId, payload, options = {} }) => {
   const rawResult = await ContactsCollection.findOneAndUpdate(
-    { _id },
+    { _id, userId },
     payload,
     {
       ...options,
-      includeResultMetadata: true,
+      returnDocument: 'after',
     },
   );
 
-  if (!rawResult || !rawResult.value) return null;
+  if (!rawResult) return null;
 
-  return {
-    data: rawResult.value,
-    isNew: Boolean(rawResult.lastErrorObject.upserted),
-  };
+  return rawResult;
 };
 
-export const deleteContact = async (filter) =>
-  ContactsCollection.findOneAndDelete(filter);
+export const deleteContact = async ({ _id, userId }) =>
+  ContactsCollection.findOneAndDelete({ _id, userId });

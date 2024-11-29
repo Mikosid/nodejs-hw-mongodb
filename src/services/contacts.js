@@ -52,7 +52,7 @@ export const updateContact = async ({ _id, userId, payload, options = {} }) => {
     payload,
     {
       ...options,
-      returnDocument: 'after',
+      new: true,
     },
   );
 

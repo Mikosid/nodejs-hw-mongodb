@@ -34,6 +34,13 @@ export const getContacts = async ({
   };
 };
 
+export const getContactById = (id) => {
+  if (!id) {
+    throw new Error('Contact ID is required');
+  }
+  return ContactsCollection.findById(id);
+};
+
 export const getContactByIdAndUserId = (id, userId) =>
   ContactsCollection.findOne({ _id: id, userId });
 

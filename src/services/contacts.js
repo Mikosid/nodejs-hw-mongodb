@@ -10,10 +10,17 @@ export const getContacts = async ({
   filter = {},
 }) => {
   const skip = (page - 1) * perPage;
-  const data = await ContactsCollection.find(filter)
+
+  const query = ContactsCollection.find(filter);
+  if (filter.userId) {
+    query.where('userId').equals(filter.userId);
+  }
+
+  const data = await query
     .skip(skip)
     .limit(perPage)
     .sort({ [sortBy]: sortOrder });
+
   const totalItems = await ContactsCollection.countDocuments(filter);
   const paginationData = calculatePaginationData({
     page,
@@ -27,27 +34,32 @@ export const getContacts = async ({
   };
 };
 
-export const getContactsById = (id) => ContactsCollection.findById(id);
+export const getContactById = (id) => {
+  if (!id) {
+    throw new Error('Contact ID is required');
+  }
+  return ContactsCollection.findById(id);
+};
+
+export const getContactByIdAndUserId = (id, userId) =>
+  ContactsCollection.findOne({ _id: id, userId });
 
 export const addContact = (data) => ContactsCollection.create(data);
 
-export const updateContact = async ({ _id, payload, options = {} }) => {
+export const updateContact = async ({ _id, userId, payload, options = {} }) => {
   const rawResult = await ContactsCollection.findOneAndUpdate(
-    { _id },
+    { _id, userId },
     payload,
     {
       ...options,
-      includeResultMetadata: true,
+      new: true,
     },
   );
 
-  if (!rawResult || !rawResult.value) return null;
+  if (!rawResult) return null;
 
-  return {
-    data: rawResult.value,
-    isNew: Boolean(rawResult.lastErrorObject.upserted),
-  };
+  return rawResult;
 };
 
-export const deleteContact = async (filter) =>
-  ContactsCollection.findOneAndDelete(filter);
+export const deleteContact = async ({ _id, userId }) =>
+  ContactsCollection.findOneAndDelete({ _id, userId });

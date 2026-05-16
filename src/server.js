@@ -9,6 +9,7 @@ import authRouter from './routers/auth.js';
 
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { errorHandler } from './middlewares/errorHandler.js';
+import { swaggerDocs } from './middlewares/swaggerDocs.js';
 import { logger } from './middlewares/logger.js';
 
 export const setupServer = () => {
@@ -18,6 +19,7 @@ export const setupServer = () => {
   app.use(express.json());
   app.use(cookieParser());
   app.use(express.static('uploads'));
+  app.use('/api-docs', swaggerDocs());
   // app.use(logger);
 
   app.use('/auth', authRouter);

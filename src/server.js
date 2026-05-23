@@ -22,6 +22,9 @@ export const setupServer = () => {
   app.use('/api-docs', swaggerDocs());
   app.use(logger);
 
+  app.get('/', (req, res) => {
+    res.status(200).json({ message: 'Server is up' });
+  });
   app.use('/auth', authRouter);
   app.use('/contacts', contactsRouter);
 
